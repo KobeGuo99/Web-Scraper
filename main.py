@@ -1,10 +1,9 @@
 from bs4 import BeautifulSoup
 import requests
-import time
 
 
-def find_jobs():
-    html_text = requests.get('https://www.timesjobs.com/candidate/job-search.html?searchType=personalizedSearch&from=submit&txtKeywords=python&txtLocation=').text
+def find_jobs(url, unfamiliar):
+    html_text = requests.get(url).text
     soup = BeautifulSoup(html_text, 'lxml')
     jobs = soup.find_all('li', class_ = 'clearfix job-bx wht-shd-bx')
 
@@ -14,7 +13,7 @@ def find_jobs():
             company_name = job.find('h3', class_ = 'joblist-comp-name').text.replace(' ', '')
             skills = job.find('span', class_ = 'srp-skills').text.replace(' ', '')
             more_info = job.header.h2.a['href']
-            if unfamiliar_skill not in skills.lower():
+            if unfamiliar not in skills.lower():
                 with open(f'posts/job_{index}.txt', 'w') as f:
                     f.write(f'Company Name: {company_name.strip()} \n')
                     f.write(f'Required Skills: {skills.strip()} \n')
@@ -23,19 +22,18 @@ def find_jobs():
 
 
 if __name__ == '__main__':
-    print('Put some skill that you are not familiar with')
-    unfamiliar_skill = input('>').lower()
-    print(f'Filtering out {unfamiliar_skill}')  
-
     scrape_continue = True
     while scrape_continue:
-        find_jobs()
-        time_wait = 2
-        print(f'Waiting {time_wait} seconds...')
-        print('')
-        time.sleep(time_wait)
+        print('Enter the website url from timesjobs.com you want to scrape')
+        website_url = input('>')
+    
+        print('Put some skill that you are not familiar with')
+        unfamiliar_skill = input('>').lower()
+        print(f'Filtering out {unfamiliar_skill}')
 
-        question_continue = input('Do you want to scrape again? (Y/N)')
+        find_jobs(website_url, unfamiliar_skill)
+
+        question_continue = input('Do you want to scrape again? (Y/N) ')
         if question_continue.lower() != 'y':
             scrape_continue = False
         
